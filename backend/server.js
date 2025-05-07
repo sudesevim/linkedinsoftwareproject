@@ -9,7 +9,7 @@ import { connectDB } from "./lib/db.js";
 dotenv.config(); 
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5100;
 
 if (process.env.NODE_ENV !== "production") {
 	app.use(
