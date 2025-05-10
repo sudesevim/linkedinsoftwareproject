@@ -1,27 +1,44 @@
-import { mailtrapClient, sender } from "../lib/mailtrap.js";
-import {
-	createCommentNotificationEmailTemplate,
-	createConnectionAcceptedEmailTemplate,
-	createWelcomeEmailTemplate,
-} from "./emailTemplates.js";
+// emails/emailHandlers.js
+import { MailtrapClient } from "mailtrap";
+import { createWelcomeEmailTemplate } from "./emailTemplates.js";
+import dotenv from "dotenv";
 
-export const sendWelcomeEmail = async (email, name, profileUrl) => {
-	const recipient = [{ email }];
+dotenv.config();
 
-	try {
-		const response = await mailtrapClient.send({
-			from: sender,
-			to: recipient,
-			subject: "Welcome to UnLinked",
-			html: createWelcomeEmailTemplate(name, profileUrl),
-			category: "welcome",
-		});
+const TOKEN = process.env.MAILTRAP_TOKEN;
+const SENDER_EMAIL = process.env.MAILTRAP_SENDER;
 
-		console.log("Welcome Email sent succesffully", response);
-	} catch (error) {
-		throw error;
-	}
-};
+const client = new MailtrapClient({ token: TOKEN });
+
+export async function sendWelcomeEmail(to, name, profileUrl) {
+  const html = createWelcomeEmailTemplate(name, profileUrl);
+
+  await client.send({
+    from: {
+      email: SENDER_EMAIL,
+      name: "LinkedIn Team",
+    },
+    to: [
+      {
+        email: to,
+      },
+    ],
+    subject: "Welcome to LinkedIn! 🎉",
+    html,
+    category: "Welcome",
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
 
 export const sendCommentNotificationEmail = async (
 	recipientEmail,

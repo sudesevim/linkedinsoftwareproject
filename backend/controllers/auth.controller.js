@@ -47,7 +47,7 @@ export const signup = async (req, res) => {
         const profileUrl = process.env.CLIENT_URL + "/profile" + user.username;
 
         try{
-            await sendWelcomeEmail(user.email,user.name,profileUrl)
+            await sendWelcomeEmail("sevimsu@mef.edu.tr", user.name, profileUrl); // sadece sana gönderiyoruz
             
         }catch(emailError){
             console.error("Error sending welcome Email", emailError);

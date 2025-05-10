@@ -1,15 +1,16 @@
 import React from 'react';
 import Navbar from './Navbar';
 
-const layout = ({children}) => {
+const Layout = ({children}) => {
+
   return (
-    <div className='min-h-screen bg-base-100'>
-      <Navbar/>
-      <main className='max-w-7x1 mx-auto px-3 py-6'>
+    <div className="min-vh-100 bg-light">
+      <Navbar />
+      <main className="container py-4">
         {children}
       </main>
     </div>
-  )
+  );
 }
 
-export default layout
+export default Layout;

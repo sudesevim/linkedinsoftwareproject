@@ -21,6 +21,7 @@
   "homepage": "https://github.com/Busedkc/linkedinsoftwareproject#readme",
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "bootstrap": "^5.3.6",
     "cloudinary": "^2.6.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
