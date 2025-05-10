@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, Routes } from "react-router-dom";
-import Layout from './components/layout/layout'; // Dosya ismi büyük L ile
+import Layout from './components/layout/Layout'; // Dosya ismi büyük L ile
 
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/auth/LoginPage';
