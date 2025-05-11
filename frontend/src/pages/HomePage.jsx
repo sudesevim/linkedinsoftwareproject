@@ -4,8 +4,8 @@ import Sidebar from "../components/Sidebar";
 import PostCreation from "../components/PostCreation";
 import Post from "../components/Post";
 import RecommendedUser from "../components/RecommendedUser";
-import { Search, Filter, X, Users, FileText } from "lucide-react";
-import { useState } from "react";
+import { Search, Filter, X, Users, FileText, Clock, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,6 +15,8 @@ const HomePage = () => {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [searchType, setSearchType] = useState("posts"); // "posts" or "users"
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   const { data: authUser } = useQuery({
     queryKey: ["authUser"],
@@ -65,6 +67,55 @@ const HomePage = () => {
     },
   });
 
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('searchHistory');
+    if (savedHistory) {
+      setSearchHistory(JSON.parse(savedHistory));
+    }
+  }, []);
+
+  const addToSearchHistory = (query) => {
+    if (!query.trim()) return;
+    
+    const newHistory = [
+      { query, type: searchType, timestamp: new Date().toISOString() },
+      ...searchHistory.filter(item => item.query !== query)
+    ].slice(0, 5); // Keep only last 5 searches
+    
+    setSearchHistory(newHistory);
+    localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+  };
+
+  const removeFromHistory = (index) => {
+    const newHistory = searchHistory.filter((_, i) => i !== index);
+    setSearchHistory(newHistory);
+    localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+  };
+
+  const clearHistory = () => {
+    setSearchHistory([]);
+    localStorage.removeItem('searchHistory');
+  };
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+  };
+
+  const handleSearchSubmit = (e) => {
+    if (e.type === 'keypress' && e.key !== 'Enter') return;
+    if (searchQuery.trim()) {
+      addToSearchHistory(searchQuery);
+      setShowHistory(false);
+    }
+  };
+
+  const handleHistoryClick = (item) => {
+    setSearchQuery(item.query);
+    setSearchType(item.type);
+    setShowHistory(false);
+  };
+
   const handleFilterChange = (filterType, value) => {
     setSelectedFilters(prev => ({
       ...prev,
@@ -108,6 +159,20 @@ const HomePage = () => {
 
   console.log("Filtered users:", filteredUsers); // Debug log
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const searchContainer = document.querySelector('.search-container');
+      if (searchContainer && !searchContainer.contains(event.target)) {
+        setShowHistory(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   if (isLoadingPosts || isLoadingUsers || isLoadingAllUsers) {
     return (
       <div className="d-flex justify-content-center align-items-center min-vh-100">
@@ -129,16 +194,67 @@ const HomePage = () => {
           <div className="card bg-light mb-4">
             <div className="card-body">
               <div className="d-flex gap-2 mb-3">
-                <div className="flex-grow-1 position-relative">
+                <div className="flex-grow-1 position-relative search-container">
                   <Search size={18} className="position-absolute top-50 start-3 translate-middle-y text-muted mx-2" />
                   <input
                     type="text"
                     className="form-control"
                     placeholder={searchType === "posts" ? "Search posts..." : "Search users..."}
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{ paddingLeft: "2rem" }}
+                    onChange={handleSearch}
+                    onKeyPress={handleSearchSubmit}
+                    onFocus={() => setShowHistory(true)}
+                    style={{ paddingLeft: "2rem", paddingRight: "4.5rem" }}
                   />
+                  <button 
+                    className="btn btn-primary position-absolute end-0 top-50 translate-middle-y"
+                    style={{ right: "0.5rem" }}
+                    onClick={handleSearchSubmit}
+                  >
+                    Search
+                  </button>
+                  {showHistory && searchHistory.length > 0 && (
+                    <div className="position-absolute w-100 bg-white shadow-sm rounded mt-1" style={{ zIndex: 1000 }}>
+                      <div className="d-flex justify-content-between align-items-center p-2 border-bottom">
+                        <h6 className="mb-0">Recent Searches</h6>
+                        <button 
+                          className="btn btn-link text-danger p-0" 
+                          onClick={clearHistory}
+                        >
+                          Clear All
+                        </button>
+                      </div>
+                      {searchHistory.map((item, index) => (
+                        <div 
+                          key={index} 
+                          className="d-flex justify-content-between align-items-center p-2 hover-bg-light cursor-pointer"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => handleHistoryClick(item)}
+                        >
+                          <div className="d-flex align-items-center">
+                            <Clock size={16} className="text-muted me-2" />
+                            <div>
+                              <div className="small">{item.query}</div>
+                              <small className="text-muted">
+                                {item.type === 'posts' ? 'Posts' : 'Users'} • {
+                                  new Date(item.timestamp).toLocaleDateString()
+                                }
+                              </small>
+                            </div>
+                          </div>
+                          <button 
+                            className="btn btn-link text-muted p-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeFromHistory(index);
+                            }}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="btn-group">
                   <button
