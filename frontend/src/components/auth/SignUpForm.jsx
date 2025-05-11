@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../../lib/axios";
 import { toast } from "react-hot-toast";
 import { Loader } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const SignUpForm = () => {
 	const [name, setName] = useState("");
@@ -10,6 +11,7 @@ const SignUpForm = () => {
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [errorMessage, setErrorMessage] = useState("");
+	const navigate = useNavigate();
 
     const queryClient = useQueryClient();
 
@@ -18,19 +20,21 @@ const SignUpForm = () => {
 			const res = await axiosInstance.post("/auth/signup", data);
 			return res.data;
 		},
-		onSuccess: () => {
+		onSuccess: (data) => {
 			toast.success("Account created successfully.");
 			queryClient.invalidateQueries({ queryKey: ["authUser"] });
+			navigate(`/profile/${data.username}`);
 		},
 		onError: (err) => {
-			console.log("we have an error", err);
-			setErrorMessage(err?.response?.data?.message || "Something went wrong!");
-			toast.error("Something went wrong!");
+			const errorMsg = err?.response?.data?.message || "Something went wrong!";
+			setErrorMessage(errorMsg);
+			toast.error(errorMsg);
 		},
 	});
 
 	const handleSignUp = (e) => {
 		e.preventDefault();
+		setErrorMessage(""); // Clear any previous error messages
 		signUpMutation({ name, username, email, password });
 	};
 
@@ -73,6 +77,7 @@ const SignUpForm = () => {
 				onChange={(e) => setPassword(e.target.value)}
 				className="form-control bg-light"
 				required
+				minLength={6}
 			/>
 
 			<button type="submit" disabled={isLoading} className="btn btn-primary mt-3">
