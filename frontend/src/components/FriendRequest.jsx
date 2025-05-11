@@ -29,39 +29,42 @@ const FriendRequest = ({ request }) => {
 	});
 
 	return (
-		<div className='bg-white rounded-lg shadow p-4 flex items-center justify-between transition-all hover:shadow-md'>
-			<div className='flex items-center gap-4'>
-				<Link to={`/profile/${request.sender.username}`}>
-					<img
-						src={request.sender.profilePicture || "/avatar.png"}
-						alt={request.name}
-						className='w-16 h-16 rounded-full object-cover'
-					/>
-				</Link>
-
-				<div>
-					<Link to={`/profile/${request.sender.username}`} className='font-semibold text-lg'>
-						{request.sender.name}
+		<div className="card mb-3 shadow-sm">
+			<div className="card-body d-flex justify-content-between align-items-center">
+				<div className="d-flex align-items-center gap-3">
+					<Link to={`/profile/${request.sender.username}`}>
+						<img
+							src={request.sender.profilePicture || "/avatar.png"}
+							alt={request.name}
+							className="rounded-circle"
+							style={{ width: "64px", height: "64px", objectFit: "cover" }}
+						/>
 					</Link>
-					<p className='text-gray-600'>{request.sender.headline}</p>
+					<div>
+						<Link to={`/profile/${request.sender.username}`} className="fw-semibold text-decoration-none text-dark">
+							{request.sender.name}
+						</Link>
+						<p className="text-muted mb-0">{request.sender.headline}</p>
+					</div>
 				</div>
-			</div>
 
-			<div className='space-x-2'>
-				<button
-					className='bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors'
-					onClick={() => acceptConnectionRequest(request._id)}
-				>
-					Accept
-				</button>
-				<button
-					className='bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors'
-					onClick={() => rejectConnectionRequest(request._id)}
-				>
-					Reject
-				</button>
+				<div className="btn-group">
+					<button
+						className="btn btn-primary"
+						onClick={() => acceptConnectionRequest(request._id)}
+					>
+						Accept
+					</button>
+					<button
+						className="btn btn-outline-secondary"
+						onClick={() => rejectConnectionRequest(request._id)}
+					>
+						Reject
+					</button>
+				</div>
 			</div>
 		</div>
 	);
 };
+
 export default FriendRequest;
