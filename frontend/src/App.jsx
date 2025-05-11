@@ -74,6 +74,10 @@ function App() {
             path='/post/:postId' 
             element={authUser ? <PostPage /> : <Navigate to="/login" />} 
           />
+          <Route 
+            path='/profile/:username' 
+            element={authUser ? <ProfilePage /> : <Navigate to="/login" />} 
+          />
         </Routes>
       </Suspense>
       <Toaster />
