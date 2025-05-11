@@ -34,7 +34,9 @@ function App() {
       }
     },
     // Add staleTime to prevent unnecessary refetches
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Changed from 5 minutes to 0 to always fetch fresh data
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   // Only show loading spinner for protected routes

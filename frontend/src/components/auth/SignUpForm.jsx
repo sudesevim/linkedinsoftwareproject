@@ -26,9 +26,15 @@ const SignUpForm = () => {
 		},
 		onSuccess: async (data) => {
 			toast.success("Account created successfully!");
+			// Set the user data in cache first
 			queryClient.setQueryData(["authUser"], data.user);
-			navigate(`/profile/${data.user.username}`);
-		  },		  
+			// Then invalidate to trigger a refetch
+			await queryClient.invalidateQueries({ queryKey: ["authUser"] });
+			// Force a refetch
+			await queryClient.refetchQueries({ queryKey: ["authUser"] });
+			// Navigate to home page
+			navigate("/", { replace: true });
+		},
 		onError: (err) => {
 			const errorMsg = err?.response?.data?.message || "Something went wrong!";
 			setErrorMessage(errorMsg);
