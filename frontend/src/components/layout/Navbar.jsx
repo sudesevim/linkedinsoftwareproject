@@ -40,10 +40,11 @@ const Navbar = () => {
 			}
 		},
     onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["authUser"] });
-			toast.success("Logged out successfully");
-			navigate("/login");
-		},
+      queryClient.setQueryData(["authUser"], null); // Cache'ten tamamen sil
+      queryClient.removeQueries(["authUser"]); // İsteği de sil
+      toast.success("Logged out successfully");
+      navigate("/login");
+    },    
 		onError: (error) => {
 			toast.error(error.response?.data?.message || "Failed to logout");
 		}

@@ -125,9 +125,13 @@ export const login = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-    res.clearCookie("jwt-linkedin");
-    res.json({ message: "Logged out succesfully"});
-}
+	res.clearCookie("jwt-linkedin", {
+		httpOnly: true,
+		sameSite: "strict",
+		secure: process.env.NODE_ENV === "production", // local'de false, prod'da true
+	});
+	res.status(200).json({ message: "Logged out successfully" });
+};
 
 export const getCurrentUser = async (req, res) => {
 	try {
