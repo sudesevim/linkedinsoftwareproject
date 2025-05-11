@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
 import Sidebar from "../components/Sidebar";
-import { Briefcase, MapPin, Clock, DollarSign, Building, Check } from "lucide-react";
+import { Briefcase, MapPin, Clock, DollarSign, Building, Check, Bookmark, Trash2 } from "lucide-react";
 import { mockJobs } from "../data/mockJobs";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
@@ -11,6 +11,7 @@ const JobListingsPage = () => {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
   const [selectedJob, setSelectedJob] = useState(null);
   const [appliedJobs, setAppliedJobs] = useState(new Set());
+  const [savedJobs, setSavedJobs] = useState(new Set());
 
   const handleApplyClick = (job) => {
     setSelectedJob(job);
@@ -24,11 +25,59 @@ const JobListingsPage = () => {
     setAppliedJobs(prev => new Set([...prev, jobId]));
   };
 
+  const handleSaveJob = (jobId) => {
+    setSavedJobs(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(jobId)) {
+        newSet.delete(jobId);
+      } else {
+        newSet.add(jobId);
+      }
+      return newSet;
+    });
+  };
+
+  const savedJobsList = mockJobs.filter(job => savedJobs.has(job.id));
+
   return (
     <div className="container mt-4">
       <div className="row g-4">
         <div className="col-lg-3">
           <Sidebar user={authUser} />
+          
+          {savedJobs.size > 0 && (
+            <div className="card bg-light shadow-sm mb-4 mt-4">
+              <div className="card-body">
+                <h5 className="card-title h6 mb-3 d-flex align-items-center gap-2">
+                  <Bookmark size={18} className="text-success" />
+                  Saved Jobs
+                </h5>
+                <div className="d-flex flex-column gap-2">
+                  {savedJobsList.map(job => (
+                    <div key={job.id} className="card bg-white">
+                      <div className="card-body p-3">
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                          <h6 className="card-title mb-1 small">{job.title}</h6>
+                          <button
+                            onClick={() => handleSaveJob(job.id)}
+                            className="btn btn-link p-0 text-decoration-none"
+                            style={{ color: '#dc3545' }}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                        <p className="text-muted small mb-2">{job.company}</p>
+                        <div className="d-flex align-items-center text-muted small">
+                          <MapPin size={14} className="me-1" />
+                          {job.location}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         <div className="col-lg-9">
           <div className="card bg-light shadow-sm mb-4">
@@ -47,7 +96,16 @@ const JobListingsPage = () => {
                           style={{ width: "64px", height: "64px", objectFit: "cover" }}
                         />
                         <div className="flex-grow-1">
-                          <h5 className="card-title mb-1">{job.title}</h5>
+                          <div className="d-flex justify-content-between align-items-start mb-2">
+                            <h5 className="card-title mb-1">{job.title}</h5>
+                            <button
+                              onClick={() => handleSaveJob(job.id)}
+                              className="btn btn-link p-0 text-decoration-none"
+                              style={{ color: savedJobs.has(job.id) ? '#198754' : '#6c757d' }}
+                            >
+                              <Bookmark size={20} fill={savedJobs.has(job.id) ? 'currentColor' : 'none'} />
+                            </button>
+                          </div>
                           <p className="text-muted mb-2">{job.company}</p>
                           
                           <div className="d-flex flex-wrap gap-3 mb-3">
