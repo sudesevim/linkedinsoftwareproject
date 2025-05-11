@@ -15,6 +15,10 @@ export default function Sidebar({ user }) {
 		setShowVisibilitySettings(!showVisibilitySettings);
 	};
 
+	if (!user) {
+		return null;
+	}
+
 	return (
 		<div className="bg-secondary text-white rounded shadow-sm overflow-hidden p-2">
 			<div className="text-center mt-5">
@@ -35,7 +39,7 @@ export default function Sidebar({ user }) {
 					<h5 className="mt-2 mb-0">{user.name}</h5>
 				</Link>
 				<p className="text-info mb-1 mt-2">{user.headline}</p>
-				<p className="text-info small">{user.connections.length} connections</p>
+				<p className="text-info small">{user.connections?.length || 0} connections</p>
 			</div>
 
 			<hr className="border-light m-0" />
