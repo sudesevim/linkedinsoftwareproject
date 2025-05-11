@@ -67,7 +67,17 @@ export const signup = async (req, res) => {
             secure: process.env.NODE_ENV === "production",
         });
 
-        res.status(201).json({ message: "Account created successfully" });
+        res.status(201).json({
+            message: "Account created successfully",
+            user: {
+              _id: user._id,
+              name: user.name,
+              username: user.username,
+              email: user.email,
+              profilePicture: user.profilePicture,
+              headline: user.headline,
+            }
+          });          
 
         // Send welcome email
         const profileUrl = process.env.CLIENT_URL + "/profile/" + user.username;

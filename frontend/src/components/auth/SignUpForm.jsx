@@ -12,19 +12,23 @@ const SignUpForm = () => {
 	const [password, setPassword] = useState("");
 	const [errorMessage, setErrorMessage] = useState("");
 	const navigate = useNavigate();
-
-    const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
 	const { mutate: signUpMutation, isLoading } = useMutation({
 		mutationFn: async (data) => {
-			const res = await axiosInstance.post("/auth/signup", data);
-			return res.data;
+			try {
+				const response = await axiosInstance.post("/auth/signup", data);
+				return response.data;
+			} catch (error) {
+				console.error("Signup error:", error);
+				throw error;
+			}
 		},
-		onSuccess: (data) => {
-			toast.success("Account created successfully.");
-			queryClient.invalidateQueries({ queryKey: ["authUser"] });
-			navigate(`/profile/${data.username}`);
-		},
+		onSuccess: async (data) => {
+			toast.success("Account created successfully!");
+			queryClient.setQueryData(["authUser"], data.user);
+			navigate(`/profile/${data.user.username}`);
+		  },		  
 		onError: (err) => {
 			const errorMsg = err?.response?.data?.message || "Something went wrong!";
 			setErrorMessage(errorMsg);
@@ -35,6 +39,26 @@ const SignUpForm = () => {
 	const handleSignUp = (e) => {
 		e.preventDefault();
 		setErrorMessage(""); // Clear any previous error messages
+		
+		// Validate form fields
+		if (!name || !email || !username || !password) {
+			setErrorMessage("Please fill in all fields");
+			return;
+		}
+
+		// Validate email format
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(email)) {
+			setErrorMessage("Please enter a valid email address");
+			return;
+		}
+
+		// Validate password length
+		if (password.length < 6) {
+			setErrorMessage("Password must be at least 6 characters long");
+			return;
+		}
+
 		signUpMutation({ name, username, email, password });
 	};
 
@@ -80,8 +104,19 @@ const SignUpForm = () => {
 				minLength={6}
 			/>
 
-			<button type="submit" disabled={isLoading} className="btn btn-primary mt-3">
-				{isLoading ? <Loader className="size-5 animate-spin" /> : "Agree & Join"}
+			<button 
+				type="submit" 
+				disabled={isLoading} 
+				className="btn btn-primary mt-3"
+			>
+				{isLoading ? (
+					<>
+						<Loader className="spinner-border spinner-border-sm me-2" />
+						Creating account...
+					</>
+				) : (
+					"Agree & Join"
+				)}
 			</button>
 		</form>
 	);
