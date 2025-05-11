@@ -167,3 +167,85 @@ export const likePost = async (req, res) => {
 		res.status(500).json({ message: "Server error" });
 	}
 };
+
+export const updatePost = async (req, res) => {
+	try {
+		const postId = req.params.id;
+		const { content, image } = req.body;
+		const userId = req.user._id;
+
+		const post = await Post.findById(postId);
+
+		if (!post) {
+			return res.status(404).json({ message: "Post not found" });
+		}
+
+		// check if the current user is the author of the post
+		if (post.author.toString() !== userId.toString()) {
+			return res.status(403).json({ message: "You are not authorized to edit this post" });
+		}
+
+		let updatedPost = { content };
+
+		if (image && image !== post.image) {
+			// Delete old image from cloudinary if exists
+			if (post.image) {
+				await cloudinary.uploader.destroy(post.image.split("/").pop().split(".")[0]);
+			}
+			// Upload new image
+			const imgResult = await cloudinary.uploader.upload(image);
+			updatedPost.image = imgResult.secure_url;
+		}
+
+		const updated = await Post.findByIdAndUpdate(
+			postId,
+			updatedPost,
+			{ new: true }
+		).populate("author", "name username profilePicture headline")
+		 .populate("comments.user", "name profilePicture");
+
+		res.status(200).json(updated);
+	} catch (error) {
+		console.error("Error in updatePost controller:", error);
+		res.status(500).json({ message: "Server error" });
+	}
+};
+
+export const reportPost = async (req, res) => {
+	try {
+		const postId = req.params.id;
+		const { reason } = req.body;
+		const userId = req.user._id;
+
+		const post = await Post.findById(postId);
+
+		if (!post) {
+			return res.status(404).json({ message: "Post not found" });
+		}
+
+		// Check if user has already reported this post
+		const hasReported = post.reports.some(report => report.user.toString() === userId.toString());
+		if (hasReported) {
+			return res.status(400).json({ message: "You have already reported this post" });
+		}
+
+		// Add report
+		post.reports.push({
+			user: userId,
+			reason
+		});
+
+		await post.save();
+
+		// If post has more than 5 reports, notify admin (you can implement this later)
+		if (post.reports.length >= 5) {
+			// TODO: Implement admin notification
+			console.log(`Post ${postId} has received ${post.reports.length} reports`);
+		}
+
+		res.status(200).json({ message: "Post reported successfully" });
+	} catch (error) {
+		console.error("Error in reportPost controller:", error);
+		res.status(500).json({ message: "Server error" });
+	}
+};

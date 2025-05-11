@@ -6,6 +6,11 @@ const postSchema = new mongoose.Schema(
 		content: { type: String },
 		image: { type: String },
 		likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+		reports: [{
+			user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+			reason: { type: String, required: true },
+			createdAt: { type: Date, default: Date.now }
+		}],
 		comments: [
 			{
 				content: { type: String },
