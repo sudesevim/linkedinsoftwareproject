@@ -8,6 +8,7 @@ import NotificationsPage from "./pages/NotificationsPage";
 import NetworkPage from "./pages/NetworkPage";
 import PostPage from "./pages/PostPage";
 import ProfilePage from "./pages/ProfilePage";
+import JobListingsPage from "./pages/JobListingsPage";
 
 // Lazy load pages
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -79,6 +80,10 @@ function App() {
           <Route 
             path='/profile/:username' 
             element={authUser ? <ProfilePage /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path='/jobs' 
+            element={authUser ? <JobListingsPage /> : <Navigate to="/login" />} 
           />
         </Routes>
       </Suspense>

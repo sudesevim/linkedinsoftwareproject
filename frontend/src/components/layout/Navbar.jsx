@@ -2,7 +2,7 @@ import React from 'react';
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../../lib/axios";
 import { Link, useNavigate } from "react-router-dom";
-import { Home, Users, Bell, User, LogOut } from "lucide-react";
+import { Home, Users, Bell, User, LogOut, Briefcase } from "lucide-react";
 import toast from "react-hot-toast";
 
 const Navbar = () => {
@@ -84,6 +84,11 @@ const Navbar = () => {
                   )}
                 </Link>
 
+                <Link to="/jobs" className="text-light d-flex flex-column align-items-center text-decoration-none">
+                  <Briefcase size={20} />
+                  <span className="small d-none d-md-block">Jobs</span>
+                </Link>
+
                 <Link to="/notifications" className="text-light d-flex flex-column align-items-center text-decoration-none position-relative">
                   <Bell size={20} />
                   <span className="small d-none d-md-block">Notifications</span>
@@ -96,7 +101,7 @@ const Navbar = () => {
 
                 <Link to={`/profile/${authUser.username}`} className="text-light d-flex flex-column align-items-center text-decoration-none">
                   <User size={20} />
-                  <span className="small d-none d-md-block">Me</span>
+                  <span className="small d-none d-md-block">My Profile</span>
                 </Link>
 
                 <button
