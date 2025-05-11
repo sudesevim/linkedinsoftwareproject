@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
 import Sidebar from "../components/Sidebar";
-import { Briefcase, MapPin, Clock, DollarSign, Building, Check, Bookmark, Trash2 } from "lucide-react";
+import { Briefcase, MapPin, Clock, DollarSign, Building, Check, Bookmark, Trash2, AlertCircle } from "lucide-react";
 import { mockJobs } from "../data/mockJobs";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
@@ -12,6 +12,7 @@ const JobListingsPage = () => {
   const [selectedJob, setSelectedJob] = useState(null);
   const [appliedJobs, setAppliedJobs] = useState(new Set());
   const [savedJobs, setSavedJobs] = useState(new Set());
+  const [withdrawJobId, setWithdrawJobId] = useState(null);
 
   const handleApplyClick = (job) => {
     setSelectedJob(job);
@@ -37,7 +38,25 @@ const JobListingsPage = () => {
     });
   };
 
+  const handleWithdrawClick = (jobId) => {
+    setWithdrawJobId(jobId);
+  };
+
+  const handleWithdrawConfirm = () => {
+    setAppliedJobs(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(withdrawJobId);
+      return newSet;
+    });
+    setWithdrawJobId(null);
+  };
+
+  const handleWithdrawCancel = () => {
+    setWithdrawJobId(null);
+  };
+
   const savedJobsList = mockJobs.filter(job => savedJobs.has(job.id));
+  const jobToWithdraw = withdrawJobId ? mockJobs.find(job => job.id === withdrawJobId) : null;
 
   return (
     <div className="container mt-4">
@@ -142,8 +161,7 @@ const JobListingsPage = () => {
                             </small>
                             <button 
                               className={`btn btn-sm d-flex align-items-center gap-1 ${appliedJobs.has(job.id) ? 'btn-success' : 'btn-primary'}`}
-                              onClick={() => handleApplyClick(job)}
-                              disabled={appliedJobs.has(job.id)}
+                              onClick={() => appliedJobs.has(job.id) ? handleWithdrawClick(job.id) : handleApplyClick(job)}
                             >
                               {appliedJobs.has(job.id) ? (
                                 <>
@@ -174,6 +192,37 @@ const JobListingsPage = () => {
           companyName={selectedJob.company}
           onApplicationSubmit={() => handleApplicationSubmit(selectedJob.id)}
         />
+      )}
+
+      {/* Withdraw Confirmation Modal */}
+      {withdrawJobId && jobToWithdraw && (
+        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Withdraw Application</h5>
+                <button type="button" className="btn-close" onClick={handleWithdrawCancel}></button>
+              </div>
+              <div className="modal-body">
+                <div className="d-flex align-items-center gap-3 mb-3">
+                  <AlertCircle size={24} className="text-warning" />
+                  <p className="mb-0">
+                    Are you sure you want to withdraw your application for <strong>{jobToWithdraw.title}</strong> at <strong>{jobToWithdraw.company}</strong>?
+                  </p>
+                </div>
+                <p className="text-muted small mb-0">This action cannot be undone.</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={handleWithdrawCancel}>
+                  Cancel
+                </button>
+                <button type="button" className="btn btn-danger" onClick={handleWithdrawConfirm}>
+                  Withdraw Application
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
