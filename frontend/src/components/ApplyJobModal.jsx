@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X, Upload } from "lucide-react";
 
-const ApplyJobModal = ({ isOpen, onClose, jobTitle, companyName }) => {
+const ApplyJobModal = ({ isOpen, onClose, jobTitle, companyName, onApplicationSubmit }) => {
   const [cvFile, setCvFile] = useState(null);
   const [coverLetter, setCoverLetter] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,6 +22,7 @@ const ApplyJobModal = ({ isOpen, onClose, jobTitle, companyName }) => {
     // Simulate API call
     setTimeout(() => {
       setIsSubmitting(false);
+      onApplicationSubmit();
       onClose();
       alert("Application submitted successfully!");
     }, 1500);

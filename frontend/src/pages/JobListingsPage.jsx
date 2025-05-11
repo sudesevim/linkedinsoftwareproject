@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
 import Sidebar from "../components/Sidebar";
-import { Briefcase, MapPin, Clock, DollarSign, Building } from "lucide-react";
+import { Briefcase, MapPin, Clock, DollarSign, Building, Check } from "lucide-react";
 import { mockJobs } from "../data/mockJobs";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
@@ -10,6 +10,7 @@ import ApplyJobModal from "../components/ApplyJobModal";
 const JobListingsPage = () => {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
   const [selectedJob, setSelectedJob] = useState(null);
+  const [appliedJobs, setAppliedJobs] = useState(new Set());
 
   const handleApplyClick = (job) => {
     setSelectedJob(job);
@@ -17,6 +18,10 @@ const JobListingsPage = () => {
 
   const handleCloseModal = () => {
     setSelectedJob(null);
+  };
+
+  const handleApplicationSubmit = (jobId) => {
+    setAppliedJobs(prev => new Set([...prev, jobId]));
   };
 
   return (
@@ -78,10 +83,18 @@ const JobListingsPage = () => {
                               Posted {formatDistanceToNow(new Date(job.postedAt), { addSuffix: true })}
                             </small>
                             <button 
-                              className="btn btn-primary btn-sm"
+                              className={`btn btn-sm d-flex align-items-center gap-1 ${appliedJobs.has(job.id) ? 'btn-success' : 'btn-primary'}`}
                               onClick={() => handleApplyClick(job)}
+                              disabled={appliedJobs.has(job.id)}
                             >
-                              Apply Now
+                              {appliedJobs.has(job.id) ? (
+                                <>
+                                  <Check size={16} />
+                                  Applied
+                                </>
+                              ) : (
+                                'Apply Now'
+                              )}
                             </button>
                           </div>
                         </div>
@@ -101,6 +114,7 @@ const JobListingsPage = () => {
           onClose={handleCloseModal}
           jobTitle={selectedJob.title}
           companyName={selectedJob.company}
+          onApplicationSubmit={() => handleApplicationSubmit(selectedJob.id)}
         />
       )}
     </div>
