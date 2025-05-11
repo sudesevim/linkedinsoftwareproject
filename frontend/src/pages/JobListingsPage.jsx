@@ -56,6 +56,7 @@ const JobListingsPage = () => {
   };
 
   const savedJobsList = mockJobs.filter(job => savedJobs.has(job.id));
+  const appliedJobsList = mockJobs.filter(job => appliedJobs.has(job.id));
   const jobToWithdraw = withdrawJobId ? mockJobs.find(job => job.id === withdrawJobId) : null;
 
   return (
@@ -89,6 +90,44 @@ const JobListingsPage = () => {
                         <div className="d-flex align-items-center text-muted small">
                           <MapPin size={14} className="me-1" />
                           {job.location}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {appliedJobs.size > 0 && (
+            <div className="card bg-light shadow-sm mb-4">
+              <div className="card-body">
+                <h5 className="card-title h6 mb-3 d-flex align-items-center gap-2">
+                  <Check size={18} className="text-success" />
+                  Applied Jobs
+                </h5>
+                <div className="d-flex flex-column gap-2">
+                  {appliedJobsList.map(job => (
+                    <div key={job.id} className="card bg-white">
+                      <div className="card-body p-3">
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                          <h6 className="card-title mb-1 small">{job.title}</h6>
+                          <button
+                            onClick={() => handleWithdrawClick(job.id)}
+                            className="btn btn-link p-0 text-decoration-none"
+                            style={{ color: '#dc3545' }}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                        <p className="text-muted small mb-2">{job.company}</p>
+                        <div className="d-flex align-items-center text-muted small">
+                          <MapPin size={14} className="me-1" />
+                          {job.location}
+                        </div>
+                        <div className="d-flex align-items-center text-success small mt-2">
+                          <Check size={14} className="me-1" />
+                          Application Submitted
                         </div>
                       </div>
                     </div>
