@@ -4,16 +4,15 @@ import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { Check, Clock, UserCheck, UserPlus, X } from "lucide-react";
 
-const RecommendedUser = ({user}) => {
-    const queryClient = useQueryClient()
+const RecommendedUser = ({ user }) => {
+	const queryClient = useQueryClient();
 
-    const {data:connectionStatus, isLoading} = useQuery({
-        queryKey: ["connectionStatus", user._id],
-        queryFn: () => axiosInstance.get('/connections/status/${user._id}'),
+	const { data: connectionStatus, isLoading } = useQuery({
+		queryKey: ["connectionStatus", user._id],
+		queryFn: () => axiosInstance.get(`/connections/status/${user._id}`),
+	});
 
-    })
-
-    const { mutate: sendConnectionRequest } = useMutation({
+	const { mutate: sendConnectionRequest } = useMutation({
 		mutationFn: (userId) => axiosInstance.post(`/connections/request/${userId}`),
 		onSuccess: () => {
 			toast.success("Connection request sent successfully");
@@ -23,7 +22,8 @@ const RecommendedUser = ({user}) => {
 			toast.error(error.response?.data?.error || "An error occurred");
 		},
 	});
-    const { mutate: acceptRequest } = useMutation({
+
+	const { mutate: acceptRequest } = useMutation({
 		mutationFn: (requestId) => axiosInstance.put(`/connections/accept/${requestId}`),
 		onSuccess: () => {
 			toast.success("Connection request accepted");
@@ -33,7 +33,8 @@ const RecommendedUser = ({user}) => {
 			toast.error(error.response?.data?.error || "An error occurred");
 		},
 	});
-    const { mutate: rejectRequest } = useMutation({
+
+	const { mutate: rejectRequest } = useMutation({
 		mutationFn: (requestId) => axiosInstance.put(`/connections/reject/${requestId}`),
 		onSuccess: () => {
 			toast.success("Connection request rejected");
@@ -44,10 +45,16 @@ const RecommendedUser = ({user}) => {
 		},
 	});
 
-    const renderButton = () => {
+	const handleConnect = () => {
+		if (connectionStatus?.data?.status === "not_connected") {
+			sendConnectionRequest(user._id);
+		}
+	};
+
+	const renderButton = () => {
 		if (isLoading) {
 			return (
-				<button className='px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-500' disabled>
+				<button className="btn btn-secondary btn-sm" disabled>
 					Loading...
 				</button>
 			);
@@ -56,26 +63,23 @@ const RecommendedUser = ({user}) => {
 		switch (connectionStatus?.data?.status) {
 			case "pending":
 				return (
-					<button
-						className='px-3 py-1 rounded-full text-sm bg-yellow-500 text-white flex items-center'
-						disabled
-					>
-						<Clock size={16} className='mr-1' />
+					<button className="btn btn-warning btn-sm d-flex align-items-center" disabled>
+						<Clock size={16} className="me-1" />
 						Pending
 					</button>
 				);
 			case "received":
 				return (
-					<div className='flex gap-2 justify-center'>
+					<div className="d-flex gap-2">
 						<button
 							onClick={() => acceptRequest(connectionStatus.data.requestId)}
-							className={`rounded-full p-1 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white`}
+							className="btn btn-success btn-sm"
 						>
 							<Check size={16} />
 						</button>
 						<button
 							onClick={() => rejectRequest(connectionStatus.data.requestId)}
-							className={`rounded-full p-1 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white`}
+							className="btn btn-danger btn-sm"
 						>
 							<X size={16} />
 						</button>
@@ -83,48 +87,41 @@ const RecommendedUser = ({user}) => {
 				);
 			case "connected":
 				return (
-					<button
-						className='px-3 py-1 rounded-full text-sm bg-green-500 text-white flex items-center'
-						disabled
-					>
-						<UserCheck size={16} className='mr-1' />
+					<button className="btn btn-success btn-sm d-flex align-items-center" disabled>
+						<UserCheck size={16} className="me-1" />
 						Connected
 					</button>
 				);
 			default:
 				return (
 					<button
-						className='px-3 py-1 rounded-full text-sm border border-primary text-primary hover:bg-primary hover:text-white transition-colors duration-200 flex items-center'
+						className="btn btn-outline-primary btn-sm d-flex align-items-center"
 						onClick={handleConnect}
 					>
-						<UserPlus size={16} className='mr-1' />
+						<UserPlus size={16} className="me-1" />
 						Connect
 					</button>
 				);
 		}
 	};
 
-    const handleConnect = () => {
-		if (connectionStatus?.data?.status === "not_connected") {
-			sendConnectionRequest(user._id);
-		}
-	};
-
-    return (
-		<div className='flex items-center justify-between mb-4'>
-			<Link to={`/profile/${user.username}`} className='flex items-center flex-grow'>
+	return (
+		<div className="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+			<Link to={`/profile/${user.username}`} className="d-flex align-items-center text-decoration-none text-dark flex-grow-1">
 				<img
 					src={user.profilePicture || "/avatar.png"}
 					alt={user.name}
-					className='w-12 h-12 rounded-full mr-3'
+					className="rounded-circle me-3"
+					style={{ width: "48px", height: "48px", objectFit: "cover" }}
 				/>
 				<div>
-					<h3 className='font-semibold text-sm'>{user.name}</h3>
-					<p className='text-xs text-info'>{user.headline}</p>
+					<h6 className="mb-0">{user.name}</h6>
+					<small className="text-muted">{user.headline}</small>
 				</div>
 			</Link>
 			{renderButton()}
 		</div>
 	);
 };
+
 export default RecommendedUser;

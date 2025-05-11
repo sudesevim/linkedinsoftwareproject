@@ -8,7 +8,6 @@ import { formatDistanceToNow } from "date-fns";
 
 const NotificationsPage = () => {
 	const { data: authUser } = useQuery({ queryKey: ["authUser"] });
-
 	const queryClient = useQueryClient();
 
 	const { data: notifications, isLoading } = useQuery({
@@ -34,12 +33,11 @@ const NotificationsPage = () => {
 	const renderNotificationIcon = (type) => {
 		switch (type) {
 			case "like":
-				return <ThumbsUp className='text-blue-500' />;
-
+				return <ThumbsUp className="text-primary" />;
 			case "comment":
-				return <MessageSquare className='text-green-500' />;
+				return <MessageSquare className="text-success" />;
 			case "connectionAccepted":
-				return <UserPlus className='text-purple-500' />;
+				return <UserPlus className="text-info" />;
 			default:
 				return null;
 		}
@@ -48,28 +46,24 @@ const NotificationsPage = () => {
 	const renderNotificationContent = (notification) => {
 		switch (notification.type) {
 			case "like":
-				return (
-					<span>
-						<strong>{notification.relatedUser.name}</strong> liked your post
-					</span>
-				);
+				return <strong>{notification.relatedUser.name}</strong> + " liked your post";
 			case "comment":
 				return (
-					<span>
-						<Link to={`/profile/${notification.relatedUser.username}`} className='font-bold'>
+					<>
+						<Link to={`/profile/${notification.relatedUser.username}`} className="fw-bold text-decoration-none">
 							{notification.relatedUser.name}
 						</Link>{" "}
 						commented on your post
-					</span>
+					</>
 				);
 			case "connectionAccepted":
 				return (
-					<span>
-						<Link to={`/profile/${notification.relatedUser.username}`} className='font-bold'>
+					<>
+						<Link to={`/profile/${notification.relatedUser.username}`} className="fw-bold text-decoration-none">
 							{notification.relatedUser.name}
 						</Link>{" "}
 						accepted your connection request
-					</span>
+					</>
 				);
 			default:
 				return null;
@@ -82,94 +76,104 @@ const NotificationsPage = () => {
 		return (
 			<Link
 				to={`/post/${relatedPost._id}`}
-				className='mt-2 p-2 bg-gray-50 rounded-md flex items-center space-x-2 hover:bg-gray-100 transition-colors'
+				className="d-flex align-items-center border rounded p-2 mt-2 text-decoration-none text-muted"
+				style={{ backgroundColor: "#f8f9fa" }}
 			>
 				{relatedPost.image && (
-					<img src={relatedPost.image} alt='Post preview' className='w-10 h-10 object-cover rounded' />
+					<img
+						src={relatedPost.image}
+						alt="Post preview"
+						className="me-2 rounded"
+						style={{ width: "40px", height: "40px", objectFit: "cover" }}
+					/>
 				)}
-				<div className='flex-1 overflow-hidden'>
-					<p className='text-sm text-gray-600 truncate'>{relatedPost.content}</p>
-				</div>
-				<ExternalLink size={14} className='text-gray-400' />
+				<div className="flex-grow-1 text-truncate">{relatedPost.content}</div>
+				<ExternalLink size={14} className="ms-2 text-secondary" />
 			</Link>
 		);
 	};
 
 	return (
-		<div className='grid grid-cols-1 lg:grid-cols-4 gap-6'>
-			<div className='col-span-1 lg:col-span-1'>
-				<Sidebar user={authUser} />
-			</div>
-			<div className='col-span-1 lg:col-span-3'>
-				<div className='bg-white rounded-lg shadow p-6'>
-					<h1 className='text-2xl font-bold mb-6'>Notifications</h1>
+		<div className="container mt-4">
+			<div className="row g-4">
+				<div className="col-lg-3">
+					<Sidebar user={authUser} />
+				</div>
+				<div className="col-lg-9">
+					<div className="card shadow-sm">
+						<div className="card-body">
+							<h2 className="h4 mb-4">Notifications</h2>
 
-					{isLoading ? (
-						<p>Loading notifications...</p>
-					) : notifications && notifications.data.length > 0 ? (
-						<ul>
-							{notifications.data.map((notification) => (
-								<li
-									key={notification._id}
-									className={`bg-white border rounded-lg p-4 my-4 transition-all hover:shadow-md ${
-										!notification.read ? "border-blue-500" : "border-gray-200"
-									}`}
-								>
-									<div className='flex items-start justify-between'>
-										<div className='flex items-center space-x-4'>
-											<Link to={`/profile/${notification.relatedUser.username}`}>
-												<img
-													src={notification.relatedUser.profilePicture || "/avatar.png"}
-													alt={notification.relatedUser.name}
-													className='w-12 h-12 rounded-full object-cover'
-												/>
-											</Link>
+							{isLoading ? (
+								<p>Loading notifications...</p>
+							) : notifications && notifications.data.length > 0 ? (
+								<ul className="list-unstyled">
+									{notifications.data.map((notification) => (
+										<li
+											key={notification._id}
+											className={`card mb-3 p-3 ${
+												!notification.read ? "border-primary" : "border-secondary"
+											}`}
+										>
+											<div className="d-flex justify-content-between align-items-start">
+												<div className="d-flex align-items-start gap-3">
+													<Link to={`/profile/${notification.relatedUser.username}`}>
+														<img
+															src={notification.relatedUser.profilePicture || "/avatar.png"}
+															alt={notification.relatedUser.name}
+															className="rounded-circle"
+															style={{ width: "48px", height: "48px", objectFit: "cover" }}
+														/>
+													</Link>
 
-											<div>
-												<div className='flex items-center gap-2'>
-													<div className='p-1 bg-gray-100 rounded-full'>
-														{renderNotificationIcon(notification.type)}
+													<div>
+														<div className="d-flex align-items-center gap-2 mb-1">
+															<div className="p-1 bg-light rounded-circle d-flex align-items-center justify-content-center">
+																{renderNotificationIcon(notification.type)}
+															</div>
+															<div className="small">{renderNotificationContent(notification)}</div>
+														</div>
+														<p className="text-muted small mb-1">
+															{formatDistanceToNow(new Date(notification.createdAt), {
+																addSuffix: true,
+															})}
+														</p>
+														{renderRelatedPost(notification.relatedPost)}
 													</div>
-													<p className='text-sm'>{renderNotificationContent(notification)}</p>
 												</div>
-												<p className='text-xs text-gray-500 mt-1'>
-													{formatDistanceToNow(new Date(notification.createdAt), {
-														addSuffix: true,
-													})}
-												</p>
-												{renderRelatedPost(notification.relatedPost)}
+
+												<div className="d-flex gap-2">
+													{!notification.read && (
+														<button
+															onClick={() => markAsReadMutation(notification._id)}
+															className="btn btn-outline-primary btn-sm"
+															title="Mark as read"
+														>
+															<Eye size={16} />
+														</button>
+													)}
+
+													<button
+														onClick={() => deleteNotificationMutation(notification._id)}
+														className="btn btn-outline-danger btn-sm"
+														title="Delete"
+													>
+														<Trash2 size={16} />
+													</button>
+												</div>
 											</div>
-										</div>
-
-										<div className='flex gap-2'>
-											{!notification.read && (
-												<button
-													onClick={() => markAsReadMutation(notification._id)}
-													className='p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors'
-													aria-label='Mark as read'
-												>
-													<Eye size={16} />
-												</button>
-											)}
-
-											<button
-												onClick={() => deleteNotificationMutation(notification._id)}
-												className='p-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors'
-												aria-label='Delete notification'
-											>
-												<Trash2 size={16} />
-											</button>
-										</div>
-									</div>
-								</li>
-							))}
-						</ul>
-					) : (
-						<p>No notification at the moment.</p>
-					)}
+										</li>
+									))}
+								</ul>
+							) : (
+								<p>No notification at the moment.</p>
+							)}
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
 	);
 };
+
 export default NotificationsPage;
