@@ -46,7 +46,11 @@ const NotificationsPage = () => {
 	const renderNotificationContent = (notification) => {
 		switch (notification.type) {
 			case "like":
-				return <strong>{notification.relatedUser.name}</strong> + " liked your post";
+				return (
+					<>
+						<strong>{notification.relatedUser.name}</strong> liked your post
+					</>
+				);
 			case "comment":
 				return (
 					<>

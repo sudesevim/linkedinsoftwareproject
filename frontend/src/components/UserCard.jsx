@@ -2,20 +2,24 @@ import { Link } from "react-router-dom";
 
 function UserCard({ user, isConnection }) {
 	return (
-		<div className='bg-white rounded-lg shadow p-4 flex flex-col items-center transition-all hover:shadow-md'>
-			<Link to={`/profile/${user.username}`} className='flex flex-col items-center'>
-				<img
-					src={user.profilePicture || "/avatar.png"}
-					alt={user.name}
-					className='w-24 h-24 rounded-full object-cover mb-4'
-				/>
-				<h3 className='font-semibold text-lg text-center'>{user.name}</h3>
-			</Link>
-			<p className='text-gray-600 text-center'>{user.headline}</p>
-			<p className='text-sm text-gray-500 mt-2'>{user.connections?.length} connections</p>
-			<button className='mt-4 bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors w-full'>
-				{isConnection ? "Connected" : "Connect"}
-			</button>
+		<div className="card text-center h-100 shadow-sm">
+			<div className="card-body d-flex flex-column align-items-center">
+				<Link to={`/profile/${user.username}`} className="text-decoration-none text-dark mb-3">
+					<img
+						src={user.profilePicture || "/avatar.png"}
+						alt={user.name}
+						className="rounded-circle mb-3"
+						style={{ width: "96px", height: "96px", objectFit: "cover" }}
+					/>
+					<h5 className="card-title mb-0">{user.name}</h5>
+				</Link>
+				<p className="text-muted small mb-1">{user.headline}</p>
+				<p className="text-muted small">{user.connections?.length} connections</p>
+
+				<button className={`btn btn-sm mt-3 w-100 ${isConnection ? "btn-outline-success" : "btn-primary"}`}>
+					{isConnection ? "Connected" : "Connect"}
+				</button>
+			</div>
 		</div>
 	);
 }
