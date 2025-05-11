@@ -3,15 +3,15 @@ import { Home, UserPlus, Bell } from "lucide-react";
 
 export default function Sidebar({ user }) {
 	return (
-		<div className="bg-secondary text-white rounded shadow-sm overflow-hidden">
-			<div className="text-center">
-				<div
+		<div className="bg-secondary text-white rounded shadow-sm overflow-hidden p-2">
+			<div className="text-center mt-5">
+				{/*<div
 					className="bg-cover bg-center"
 					style={{
 						backgroundImage: `url("${user.bannerImg || "/banner.png"}")`,
 						height: "100px",
 					}}
-				/>
+				/> */}
 				<Link to={`/profile/${user.username}`} className="text-decoration-none text-white">
 					<img
 						src={user.profilePicture || "/avatar.png"}
@@ -21,7 +21,7 @@ export default function Sidebar({ user }) {
 					/>
 					<h5 className="mt-2 mb-0">{user.name}</h5>
 				</Link>
-				<p className="text-info small mb-1">{user.headline}</p>
+				<p className="text-info mb-1 mt-2">{user.headline}</p>
 				<p className="text-info small">{user.connections.length} connections</p>
 			</div>
 
@@ -49,10 +49,10 @@ export default function Sidebar({ user }) {
 				</nav>
 			</div>
 
-			<hr className="border-light m-0" />
+			<hr className="border-light m-0"/>
 
-			<div className="p-3">
-				<Link to={`/profile/${user.username}`} className="text-white text-decoration-underline small fw-semibold">
+			<div className="p-3 text-center">
+				<Link to={`/profile/${user.username}`} className="text-white small fw-semibold">
 					Visit your profile
 				</Link>
 			</div>
