@@ -1,8 +1,8 @@
-import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { useState } from 'react';
-import { toast } from 'react-toastify';
-import { axiosInstance } from '../lib/axios';
-
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { axiosInstance } from "../lib/axios";
+import toast from "react-hot-toast";
+import { Image, Loader } from "lucide-react";
 
 const PostCreation = ({ user }) => {
 	const [content, setContent] = useState("");
@@ -11,7 +11,7 @@ const PostCreation = ({ user }) => {
 
 	const queryClient = useQueryClient();
 
-	const { mutate: createPostMutation } = useMutation({
+	const { mutate: createPostMutation, isPending } = useMutation({
 		mutationFn: async (postData) => {
 			const res = await axiosInstance.post("/posts/create", postData, {
 				headers: { "Content-Type": "application/json" },
@@ -21,6 +21,7 @@ const PostCreation = ({ user }) => {
 		onSuccess: () => {
 			resetForm();
 			toast.success("Post created successfully");
+			queryClient.invalidateQueries({ queryKey: ["posts"] });
 		},
 		onError: (err) => {
 			toast.error(err.response?.data?.message || "Failed to create post");
@@ -30,8 +31,7 @@ const PostCreation = ({ user }) => {
 	const handlePostCreation = async () => {
 		try {
 			const postData = { content };
-			if (image) postData.image = image;
-
+			if (image) postData.image = await readFileAsDataURL(image);
 			createPostMutation(postData);
 		} catch (error) {
 			console.error("Error in handlePostCreation:", error);
@@ -63,9 +63,10 @@ const PostCreation = ({ user }) => {
 		});
 	};
 
-    
+	if (!user) return null;
+
 	return (
-		<div className="card bg-light rounded shadow mb-4 p-3">
+		<div className="card bg-light rounded shadow-sm mb-4 p-3">
 			<div className="d-flex mb-3 gap-3">
 				<img
 					src={user.profilePicture || "/avatar.png"}
@@ -94,9 +95,27 @@ const PostCreation = ({ user }) => {
 			)}
 
 			<div className="d-flex justify-content-between align-items-center">
-				<input type="file" className="form-control w-50" onChange={handleImageChange} />
-				<button className="btn btn-primary ms-3" onClick={handlePostCreation}>
-					Post
+				<label className="btn btn-outline-primary d-flex align-items-center">
+					<Image size={18} className="me-2" />
+					<span>Photo</span>
+					<input
+						type="file"
+						accept="image/*"
+						onChange={handleImageChange}
+						style={{ display: "none" }}
+					/>
+				</label>
+
+				<button
+					className="btn btn-primary"
+					onClick={handlePostCreation}
+					disabled={isPending}
+				>
+					{isPending ? (
+						<Loader className="me-2 spinner-border spinner-border-sm" />
+					) : (
+						"Share"
+					)}
 				</button>
 			</div>
 		</div>

@@ -53,8 +53,7 @@ const HomePage = () => {
         </div>
         
 
-        {/* Recommended Users */}
-        {/* 
+        
         {recommendedUsers?.length > 0 && (
           <div className="d-none d-lg-block col-lg-3">
             <div className="card bg-light p-3">
@@ -65,7 +64,7 @@ const HomePage = () => {
             </div>
           </div>
         )}
-        */}
+    
       </div>
     </div>
   );
