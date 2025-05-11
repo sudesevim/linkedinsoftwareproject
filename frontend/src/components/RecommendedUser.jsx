@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { Check, Clock, UserCheck, UserPlus, X } from "lucide-react";
 
-const RecommendendUser = ({user}) => {
+const RecommendedUser = ({user}) => {
     const queryClient = useQueryClient()
 
     const {data:connectionStatus, isLoading} = useQuery({

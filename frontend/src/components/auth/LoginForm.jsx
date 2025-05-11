@@ -25,11 +25,9 @@ const LoginForm = () => {
 		onSuccess: async () => {
 			// Invalidate and refetch auth user data
 			await queryClient.invalidateQueries({ queryKey: ["authUser"] });
-			// Fetch the updated user data
-			const userData = await queryClient.fetchQuery({ queryKey: ["authUser"] });
 			toast.success("Logged in successfully!");
-			// Navigate to profile page
-			navigate(`/profile/${userData.username}`);
+			// Navigate to home page
+			navigate("/");
 		},
 		onError: (err) => {
 			const errorMessage = err.response?.data?.message || "Failed to login. Please check your credentials.";

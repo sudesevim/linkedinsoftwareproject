@@ -43,6 +43,8 @@ function App() {
     </div>
   );
 
+  console.log("authUser App.jsx:", authUser);
+
   return (
     <Layout>
       <Suspense fallback={<LoadingSpinner />}>

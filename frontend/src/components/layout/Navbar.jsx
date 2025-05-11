@@ -6,7 +6,15 @@ import { Home, Users, Bell, User, LogOut } from "lucide-react";
 import toast from "react-hot-toast";
 
 const Navbar = () => {
-  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+  const { data: authUser } = useQuery({
+    queryKey: ['authUser'],
+    queryFn: async () => {
+      const res = await axiosInstance.get('/auth/me');
+      return res.data;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+  
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
