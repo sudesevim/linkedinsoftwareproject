@@ -1,7 +1,7 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { sendWelcomeEmail, sendPasswordResetEmail } from "../emails/emailHandlers.js";
+import { sendWelcomeEmail } from "../emails/emailHandlers.js";
 
 
 export const signup = async (req, res) => {
@@ -140,98 +140,5 @@ export const getCurrentUser = async (req, res) => {
 		console.error("Error in getCurrentUser controller:", error);
 		res.status(500).json({ message: "Server error" });
 	}
-};
-
-export const requestPasswordReset = async (req, res) => {
-    try {
-        const { email } = req.body;
-        console.log("Password reset requested for email:", email);
-
-        // Validate email
-        if (!email) {
-            return res.status(400).json({ message: "Email is required" });
-        }
-
-        // Find user by email
-        const user = await User.findOne({ email });
-        if (!user) {
-            console.log("No user found with email:", email);
-            return res.status(404).json({ message: "No user found with this email" });
-        }
-        console.log("User found:", user.username);
-
-        // Generate reset token
-        const resetToken = jwt.sign(
-            { userId: user._id },
-            process.env.JWT_SECRET,
-            { expiresIn: "1h" }
-        );
-        console.log("Reset token generated");
-
-        // Save reset token to user
-        user.resetPasswordToken = resetToken;
-        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-        await user.save();
-        console.log("Reset token saved to user");
-
-        // Send reset email
-        const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
-        console.log("Reset URL:", resetUrl);
-        
-        try {
-            await sendPasswordResetEmail(email, user.name, resetUrl);
-            console.log("Password reset email sent successfully");
-            res.json({ message: "Password reset email sent" });
-        } catch (emailError) {
-            console.error("Error sending reset email:", emailError);
-            res.status(500).json({ message: "Error sending reset email" });
-        }
-    } catch (error) {
-        console.error("Error in requestPasswordReset:", error);
-        res.status(500).json({ message: "Server error" });
-    }
-};
-
-export const resetPassword = async (req, res) => {
-    try {
-        const { token, newPassword } = req.body;
-
-        // Validate input
-        if (!token || !newPassword) {
-            return res.status(400).json({ message: "Token and new password are required" });
-        }
-
-        // Verify token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
-        // Find user
-        const user = await User.findOne({
-            _id: decoded.userId,
-            resetPasswordToken: token,
-            resetPasswordExpires: { $gt: Date.now() }
-        });
-
-        if (!user) {
-            return res.status(400).json({ message: "Invalid or expired reset token" });
-        }
-
-        // Hash new password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-        // Update user password and clear reset token
-        user.password = hashedPassword;
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpires = undefined;
-        await user.save();
-
-        res.json({ message: "Password has been reset successfully" });
-    } catch (error) {
-        console.error("Error in resetPassword:", error);
-        if (error.name === "JsonWebTokenError") {
-            return res.status(400).json({ message: "Invalid token" });
-        }
-        res.status(500).json({ message: "Server error" });
-    }
 };
 
