@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 import PostCreation from "../components/PostCreation";
 import Post from "../components/Post";
 import RecommendedUser from "../components/RecommendedUser";
-import { Search, Filter, X } from "lucide-react";
+import { Search, Filter, X, Users, FileText } from "lucide-react";
 import { useState } from "react";
 
 const HomePage = () => {
@@ -14,6 +14,7 @@ const HomePage = () => {
     sortBy: "recent"
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [searchType, setSearchType] = useState("posts"); // "posts" or "users"
 
   const { data: authUser } = useQuery({
     queryKey: ["authUser"],
@@ -45,6 +46,20 @@ const HomePage = () => {
         return res.data;
       } catch (error) {
         console.error("Error fetching posts:", error);
+        return [];
+      }
+    },
+  });
+
+  const { data: allUsers, isLoading: isLoadingAllUsers } = useQuery({
+    queryKey: ["allUsers"],
+    queryFn: async () => {
+      try {
+        const res = await axiosInstance.get("/users");
+        console.log("Fetched users:", res.data); // Debug log
+        return res.data;
+      } catch (error) {
+        console.error("Error fetching all users:", error);
         return [];
       }
     },
@@ -84,7 +99,16 @@ const HomePage = () => {
     return 0;
   });
 
-  if (isLoadingPosts || isLoadingUsers) {
+  const filteredUsers = allUsers?.filter(user => {
+    console.log("Filtering user:", user); // Debug log
+    return searchQuery === "" || 
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
+  console.log("Filtered users:", filteredUsers); // Debug log
+
+  if (isLoadingPosts || isLoadingUsers || isLoadingAllUsers) {
     return (
       <div className="d-flex justify-content-center align-items-center min-vh-100">
         <div className="spinner-border text-primary" role="status" />
@@ -106,25 +130,44 @@ const HomePage = () => {
             <div className="card-body">
               <div className="d-flex gap-2 mb-3">
                 <div className="flex-grow-1 position-relative">
-                  <Search size={18} className="position-absolute top-50 start-3 translate-middle-y text-muted" />
+                  <Search size={18} className="position-absolute top-50 start-3 translate-middle-y text-muted mx-2" />
                   <input
                     type="text"
-                    className="form-control ps-5"
-                    placeholder="Search posts..."
+                    className="form-control"
+                    placeholder={searchType === "posts" ? "Search posts..." : "Search users..."}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ paddingLeft: "2rem" }}
                   />
                 </div>
-                <button
-                  className={`btn ${showFilters ? 'btn-primary' : 'btn-outline-primary'}`}
-                  onClick={() => setShowFilters(!showFilters)}
-                >
-                  <Filter size={18} className="me-1" />
-                  Filters
-                </button>
+                <div className="btn-group">
+                  <button
+                    className={`btn ${searchType === "posts" ? "btn-primary" : "btn-outline-primary"}`}
+                    onClick={() => setSearchType("posts")}
+                  >
+                    <FileText size={18} className="me-1" />
+                    Posts
+                  </button>
+                  <button
+                    className={`btn ${searchType === "users" ? "btn-primary" : "btn-outline-primary"}`}
+                    onClick={() => setSearchType("users")}
+                  >
+                    <Users size={18} className="me-1" />
+                    Users
+                  </button>
+                </div>
+                {searchType === "posts" && (
+                  <button
+                    className={`btn ${showFilters ? 'btn-primary' : 'btn-outline-primary'}`}
+                    onClick={() => setShowFilters(!showFilters)}
+                  >
+                    <Filter size={18} className="me-1" />
+                    Filters
+                  </button>
+                )}
               </div>
 
-              {showFilters && (
+              {showFilters && searchType === "posts" && (
                 <div className="border-top pt-3">
                   <div className="row g-3">
                     <div className="col-md-6">
@@ -167,21 +210,70 @@ const HomePage = () => {
             </div>
           </div>
 
-          <PostCreation user={authUser} />
+          {searchType === "posts" ? (
+            <>
+              <PostCreation user={authUser} />
 
-          {filteredPosts?.map((post) => (
-            <Post key={post._id} post={post} />
-          ))}
+              {filteredPosts?.map((post) => (
+                <Post key={post._id} post={post} />
+              ))}
 
-          {(!filteredPosts || filteredPosts.length === 0) && (
-            <div className="card text-center p-4">
-              <div className="mb-3">
-                <i className="bi bi-people-fill display-4 text-primary"></i>
+              {(!filteredPosts || filteredPosts.length === 0) && (
+                <div className="card text-center p-4">
+                  <div className="mb-3">
+                    <i className="bi bi-people-fill display-4 text-primary"></i>
+                  </div>
+                  <h2 className="h4 fw-bold mb-2 text-dark">No Posts Found</h2>
+                  <p className="text-muted">
+                    {searchQuery ? "Try adjusting your search or filters" : "Connect with others to start seeing posts in your feed!"}
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="card">
+              <div className="card-body">
+                {searchQuery ? (
+                  <>
+                    {filteredUsers?.map((user) => (
+                      <div key={user._id} className="d-flex align-items-center mb-3 pb-3 border-bottom">
+                        <img
+                          src={user.profilePicture || "https://via.placeholder.com/40"}
+                          alt={user.name}
+                          className="rounded-circle me-3"
+                          style={{ width: "40px", height: "40px", objectFit: "cover" }}
+                        />
+                        <div>
+                          <h6 className="mb-0">{user.name}</h6>
+                          <small className="text-muted">{user.email}</small>
+                        </div>
+                      </div>
+                    ))}
+
+                    {(!filteredUsers || filteredUsers.length === 0) && (
+                      <div className="text-center p-4">
+                        <div className="mb-3">
+                          <i className="bi bi-search display-4 text-primary"></i>
+                        </div>
+                        <h2 className="h4 fw-bold mb-2 text-dark">No Users Found</h2>
+                        <p className="text-muted">
+                          Try adjusting your search
+                        </p>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center p-4">
+                    <div className="mb-3">
+                      <i className="bi bi-search display-4 text-primary"></i>
+                    </div>
+                    <h2 className="h4 fw-bold mb-2 text-dark">Search Users</h2>
+                    <p className="text-muted">
+                      Enter a name or email to search for users
+                    </p>
+                  </div>
+                )}
               </div>
-              <h2 className="h4 fw-bold mb-2 text-dark">No Posts Found</h2>
-              <p className="text-muted">
-                {searchQuery ? "Try adjusting your search or filters" : "Connect with others to start seeing posts in your feed!"}
-              </p>
             </div>
           )}
         </div>
