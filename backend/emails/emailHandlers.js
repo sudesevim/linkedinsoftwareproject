@@ -1,12 +1,17 @@
 // emails/emailHandlers.js
 import { MailtrapClient } from "mailtrap";
-import { createWelcomeEmailTemplate } from "./emailTemplates.js";
+import { createWelcomeEmailTemplate, createPasswordResetEmailTemplate } from "./emailTemplates.js";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const TOKEN = process.env.MAILTRAP_TOKEN;
 const SENDER_EMAIL = process.env.MAILTRAP_SENDER;
+
+console.log("Mailtrap Configuration:", {
+    token: TOKEN ? "Token exists" : "Token missing",
+    sender: SENDER_EMAIL || "Sender email not configured"
+});
 
 const client = new MailtrapClient({ token: TOKEN });
 
@@ -29,16 +34,38 @@ export async function sendWelcomeEmail(to, name, profileUrl) {
   });
 }
 
+export const sendPasswordResetEmail = async (to, name, resetUrl) => {
+  console.log("Preparing to send password reset email:", {
+    to,
+    name,
+    resetUrl
+  });
 
+  const html = createPasswordResetEmailTemplate(name, resetUrl);
 
+  try {
+    const response = await client.send({
+      from: {
+        email: SENDER_EMAIL,
+        name: "LinkedIn Team",
+      },
+      to: [
+        {
+          email: to,
+        },
+      ],
+      subject: "Reset Your LinkedIn Password",
+      html,
+      category: "Password Reset",
+    });
 
-
-
-
-
-
-
-
+    console.log("Mailtrap API Response:", response);
+    return response;
+  } catch (error) {
+    console.error("Mailtrap API Error:", error);
+    throw error;
+  }
+};
 
 export const sendCommentNotificationEmail = async (
 	recipientEmail,

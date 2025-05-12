@@ -14,6 +14,7 @@ import JobListingsPage from "./pages/JobListingsPage";
 const HomePage = lazy(() => import('./pages/HomePage'));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const SignUpPage = lazy(() => import('./pages/auth/SignUpPage'));
+const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
 
 function App() {
   const { data: authUser, isLoading } = useQuery({
@@ -85,6 +86,10 @@ function App() {
           <Route 
             path='/jobs' 
             element={authUser ? <JobListingsPage /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path='/reset-password/:token' 
+            element={<ResetPasswordPage />} 
           />
         </Routes>
       </Suspense>

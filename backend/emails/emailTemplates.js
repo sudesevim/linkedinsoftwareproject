@@ -34,3 +34,54 @@ export function createWelcomeEmailTemplate(name, profileUrl) {
   </html>
   `;
 }
+
+export const createPasswordResetEmailTemplate = (name, resetUrl) => {
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Reset Your Password</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+          }
+          .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #0077b5;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px 0;
+          }
+          .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #666;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h2>Reset Your Password</h2>
+          <p>Hello ${name},</p>
+          <p>We received a request to reset your password. Click the button below to create a new password:</p>
+          <a href="${resetUrl}" class="button">Reset Password</a>
+          <p>If you didn't request this, you can safely ignore this email.</p>
+          <p>This link will expire in 1 hour.</p>
+          <div class="footer">
+            <p>Best regards,<br>The LinkedIn Team</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+};
