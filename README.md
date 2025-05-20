@@ -29,9 +29,3 @@ The goal is to simulate a professional social networking experience.
 
 ---
 
-## ⚙️ Installation
-
-1. **Clone the repository:**
-```bash
-git clone https://github.com/Busedkc/linkedinsoftwareproject.git
-cd linkedinsoftwareproject
